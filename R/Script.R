@@ -27,22 +27,7 @@
 
 # En este trabajo daremos énfasis a nuestra pregunta principalmente que busca responder si la complejidad estructural causa una mayor diversidad de parasitoides.
 
-# Los datos se tomarán en 24 sitios en 9 momentos distintos (frecuencia mensual)
 
-#Simularemos los datos
-
-#Primero generar un data frame con la información de sitios y momentos de muestreo
-sitios1 <- rep("s", 216)
-sitios2 <- rep(1:24, each = 1)
-sitios3 <- rep(sitios2, 9)
-sitio <- paste(sitios1, sitios3)
-
-muestreos1 <- rep("m", 216)
-muestreos2 <- rep(1:9, each = 24)
-muestreo <- paste(muestreos1, muestreos2)
-
-datos <- data.frame(muestreo, sitio)
-str(datos)
 
 #Crear DAG
 
@@ -76,7 +61,6 @@ adjustmentSets(x = escamas, exposure = "x", outcome = "y", type="all", effect = 
 
 # Vemos que existe una relacion entre x y y a traves del pipe HE
 
-# Datos simulados
 
 # Compactar
 td_dag <- tidy_dagitty(escamas)
@@ -113,6 +97,23 @@ impliedConditionalIndependencies(x = escamas, type = "missing.edge")
 
 impliedConditionalIndependencies(x = escamas, type = "basis.set")
 
+
+#Los datos se tomarán en 24 sitios en 9 momentos distintos (frecuencia mensual), por lo que, los datos serán simulados partiendo de esta premisa
+
+#Simularemos los datos
+
+#Primero generar un data frame con la información de sitios y momentos de muestreo
+sitios1 <- rep("s", 216)
+sitios2 <- rep(1:24, each = 1)
+sitios3 <- rep(sitios2, 9)
+sitio <- paste(sitios1, sitios3)
+
+muestreos1 <- rep("m", 216)
+muestreos2 <- rep(1:9, each = 24)
+muestreo <- paste(muestreos1, muestreos2)
+
+datos <- data.frame(muestreo, sitio)
+str(datos)
 
 # Simulación de las relaciones de dependencia específicadas:
 
