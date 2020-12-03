@@ -1,0 +1,24 @@
+---
+title: "Trabajo Final"
+author: "Minor Solano Gutiérrez"
+date: "3/12/2020"
+output: html_document
+---
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
