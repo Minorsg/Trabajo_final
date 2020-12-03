@@ -172,31 +172,31 @@ datos$HE <- HE
 head(datos)
 
 # y = diversidad de parasitoides 
-y.err1 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err1 <- rnorm(n = 24, mean = 0, sd = 0.4)
 y1 <- 0 + 0.75*HE1 + y.err1 # y depende de HE
 
 y.err2 <- rnorm(n = 24, mean = 0, sd = 0.5)
 y2 <- 0 + 0.75*HE1 + y.err2
 
-y.err3 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err3 <- rnorm(n = 24, mean = 0, sd = 0.7)
 y3 <- 0 + 0.75*HE1 + y.err3
 
 y.err4 <- rnorm(n = 24, mean = 0, sd = 0.5)
 y4 <- 0 + 0.75*HE1 + y.err4
 
-y.err5 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err5 <- rnorm(n = 24, mean = 0, sd = 0.3)
 y5 <- 0 + 0.75*HE1 + y.err5
 
-y.err6 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err6 <- rnorm(n = 24, mean = 0, sd = 0.7)
 y6 <- 0 + 0.75*HE1 + y.err6
 
 y.err7 <- rnorm(n = 24, mean = 0, sd = 0.5)
 y7 <- 0 + 0.75*HE1 + y.err7
 
-y.err8 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err8 <- rnorm(n = 24, mean = 0, sd = 0.4)
 y8 <- 0 + 0.75*HE1 + y.err8
 
-y.err9 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y.err9 <- rnorm(n = 24, mean = 0, sd = 0.6)
 y9 <- 0 + 0.75*HE1 + y.err9
 
 y <- c(y1, y2, y3, y4, y5, y6, y7, y8, y9)
@@ -258,7 +258,7 @@ Anova(escamas.glm.nb,
       type="II",
       test="LR")
 
-# Sí hay un efecto de la complejidad vegetal de la comunidad vegetal del entorno (x) y del número de plantas hospederas de escamas (Fitófago) sobre la diversidad de parasitoides (y)
+# Según nuestros datos simulados siguiendo nuestra hipótesis de causalidad esperada, sí hay un efecto de la complejidad vegetal de la comunidad vegetal del entorno (x) y del número de plantas hospederas de escamas (Fitófago) sobre la diversidad de parasitoides (y)
 
 # ¿Qué tanto explica el modelo los datos? Lo evaluamos en base a deviance de nuestro modelo y Null deviance
 1 - (escamas.glm.nb$deviance / escamas.glm.nb$null.deviance)
@@ -290,14 +290,9 @@ UL <- exp(datos2$fit+ 1.96 * datos2$se.fit)
 # Guardar valores predichos en nueva base de datos
 nd <- data.frame(x = datos2$x, y = datos2$y, V = datos2$V,
                       fit, LL, UL)
+# Figura modelo
 
-# Gráfico
-
-# Gráfico 1
 par(mfrow = c(1, 1))
-
-
-
 
 f1 <- ggplot(nd, aes(x, fit)) +
   geom_ribbon(aes(ymin = LL, ymax = UL), fill = "gray", alpha = 0.30) +
@@ -313,3 +308,4 @@ f1 <- ggplot(nd, aes(x, fit)) +
 
 f1
 
+# En la figura se observa el efecto de la complejidad vegetal de la comunidad vegetal del entorno (x), controlando por el número de plantas hospederas de escamas (Fitófago) sobre la diversidad de parasitoides (y), según nuestros datos simulados siguiendo nuestra hipótesis de causalidad esperada
