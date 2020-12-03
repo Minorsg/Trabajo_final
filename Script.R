@@ -126,16 +126,15 @@ barplot(table(V))
 x <- rnbinom(n = 24, mu = 40, size = 5)*V # x depende de V 
 barplot(table(x))
 
-# HE = diversidad de escamas, en este caso si podrían tener distribución normal, ya que si se tiene un conjunto de índices de diversidad replicados de diferentes sitios, el índice de diversidad podría considerarse como observaciones
-E.err <- rnorm(n = 24, mean = 0, sd = 0.5)
-E <- 0 + 0.5*V + 0.5*x + E.err # E depende de V y de x
+# HE = diversidad de escamas, en este caso diversidad si podría tener distribución normal, ya que si se tiene un conjunto de índices de diversidad replicados de diferentes sitios, el índice de diversidad podría considerarse como observaciones
+HE.err <- rnorm(n = 24, mean = 0, sd = 0.5)
+HE <- 0 + 0.5*V + 0.5*x + HE.err # E depende de V y de x
 
-# y = 
+# y = diversidad de parasitoides 
 y.err <- rnorm(n = 24, mean = 0, sd = 0.5)
 y <- 0 + 0.75*E + y.err # y depende de E
 
-A.err <- rnorm(n = 100, mean = 0, sd = 0.5)
-A <- 0 + 0.5*E + 0.5*y + A.err # A depende de E
+
 
 
 
