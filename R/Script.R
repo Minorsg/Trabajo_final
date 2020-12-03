@@ -22,7 +22,7 @@
 
 #El número de plantas (V) influencia la complejidad estructural de la comunidad vegetal del entorno (x), 
 #tanto el número de plantas como la complejidad estructural influye en la diversidad de escamas (HE) y esta en la abundancia (E) de estos insectos herbívoros. 
-#Las escamas son hospederos de los parasitoides y causan mayor abundancia (A) y diversidad de parasitoides (y). 
+#Las escamas son hospederos de los parasitoides y una mayor abundanacia (E) causan mayor abundancia de parasitoides (A) y una mayor diversidad de escamas (HE) y mayor diversidad de parasitoides (y). 
 #La diversidad de parasitoides y escamas a su vez permite una mayor abundancia de parasitoides (A), ya que se reduce la competencia por hospederos.
 #La abundacia influye sobre la proporción de especialistas (S) y este a su vez sobre la uniformidad de especies (J)
 
@@ -226,6 +226,90 @@ hist(datos$y)
 
 #Se observa un distribución no normal
 
+# Modelo binomial negativo
+
+library(MASS)
+
+# Crear modelo logístico 
+escamas.glm.nb <- glm.nb(y ~ x + V,
+                    data=datos,
+                    control = glm.control(maxit=10000))
+summary(escamas.glm.nb)
 
 
+# Comparamos nuestro modelo con un modelo nulo
+nb.null <- glm.nb(y ~ 1, 
+                  link = "log", data = datos)
+summary(nb.null)
+
+AIC(escamas.glm.nb, nb.null)
+
+anova(escamas.glm.nb, nb.null, test = "Chi")
+
+# El modelo es mucho mejor que el nulo según el Theta
+
+
+
+# Análizamos diferencias significativas de nuestras variables predictoras (x, V) sobre nuestra respuesta (y)
+
+library(car)
+
+Anova(escamas.glm.nb,
+      type="II",
+      test="LR")
+
+# Sí hay un efecto de la complejidad vegetal de la comunidad vegetal del entorno (x) y del número de plantas hospederas de escamas (Fitófago) sobre la diversidad de parasitoides (y)
+
+# ¿Qué tanto explica el modelo los datos? Lo evaluamos en base a deviance de nuestro modelo y Null deviance
+1 - (escamas.glm.nb$deviance / escamas.glm.nb$null.deviance)
+
+#Nuestro modelo explica un 93% los datos
+
+# Figuras
+
+#exploramos residuales
+op <- par(mfrow = c(2, 2))
+plot(escamas.glm.nb)
+
+
+# Predicción del modelo
+datos1 <- data.frame(x = seq(min(datos$x), max(datos$x), by = 10), y = mean(datos$y), V = mean(datos$V))
+                                                                              
+
+# Predicción del modelo sobre nuestros datos simulados
+
+datos2 <- cbind(datos1, predict(escamas.glm.nb, datos1, 
+                                type = "link", 
+                                se = T))
+
+# Objeto con valores predichos por el modelo
+fit <- exp(datos2$fit)
+LL <- exp(datos2$fit- 1.96 * datos2$se.fit)
+UL <- exp(datos2$fit+ 1.96 * datos2$se.fit)
+
+# Guardar valores predichos en nueva base de datos
+nd <- data.frame(x = datos2$x, y = datos2$y, V = datos2$V,
+                      fit, LL, UL)
+
+# Gráfico
+
+# Gráfico 1
+par(mfrow = c(1, 1))
+
+
+
+
+f1 <- ggplot(nd, aes(x, fit)) +
+  geom_ribbon(aes(ymin = LL, ymax = UL), fill = "gray", alpha = 0.30) +
+  geom_line(colour = "black", size = 1, lty = 1) +
+  labs(x = "Complejidad vegetal", y = "Diversidad parasitoides") +
+  theme_classic() +
+  theme(panel.border= element_blank())+
+  theme(axis.line.x = element_line(color="black", size = .7),
+        axis.line.y = element_line(color="black", size = .7)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=14)) +
+  theme(text = element_text(size=12))
+
+f1
 
