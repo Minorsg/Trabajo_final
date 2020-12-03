@@ -13,9 +13,9 @@
 
 # Hipótesis
 # La diversidad de especies de escamas Diaspididae y sus parasitoides Hymenoptera en palmas ornamentales variará según la complejidad estructural de la comunidad vegetal entorno, 
-# donde en hábitats más complejos (p. e. parques) habrá una mayor diversidad (H') de especies, tanto de escamas, como de parasitoides, respecto a un hábitat más simple (p. e. bordes de calle o parqueos). 
+# donde, en hábitats más complejos (p. e. parques) habrá una mayor diversidad (H') de especies, tanto de escamas, como de parasitoides, respecto a un hábitat más simple (p. e. bordes de calle o parqueos). 
 # Pero no una mayor uniformidad de especies (J') (i.e. la proporción de la diversidad observada en cada hábitat, respecto a máxima diversidad posible, i.e. riqueza total), debido a las especies de especialistas de cada hábitat. 
-# Donde, se espera menos diversidad, pero con abundancias más estables de las especies de especialistas en hábitats simples, respecto a mayor diversidad, pero con abundancias menores y más heterogéneas en hábitat complejos. 
+# Por lo que, se espera menos diversidad, pero con abundancias relativas más estables por la proporción de especialistas en hábitats simples, respecto a mayor diversidad, pero con abundancias relativas menores y más heterogéneas en hábitat complejos. 
 # Esto podría explicar las razones por las cuáles zonas con una baja complejidad vegetal del entorno son más propensas a experimentar grandes incrementos en las poblaciones de escamas 
 # y proponer métodos de manejo más sostenibles de poblaciones de estos insectos basados en aumentar la complejidad estructural de la comunidad vegetal del entorno.
 
@@ -23,12 +23,15 @@
 #El número de plantas (V) influencia la complejidad estructural de la comunidad vegetal del entorno (x), 
 #tanto el número de plantas como la complejidad estructural influye en la diversidad de escamas (HE) y esta en la abundancia (E) de estos insectos herbívoros. 
 #Las escamas son hospederos de los parasitoides y una mayor abundanacia (E) causan mayor abundancia de parasitoides (A) y una mayor diversidad de escamas (HE) y mayor diversidad de parasitoides (y). 
-#La diversidad de parasitoides y escamas a su vez permite una mayor abundancia de parasitoides (A), ya que se reduce la competencia por hospederos.
 #La abundacia influye sobre la proporción de especialistas (S) y este a su vez sobre la uniformidad de especies (J)
 
 # En este trabajo daremos énfasis a nuestra pregunta principalmente que busca responder si la complejidad estructural causa una mayor diversidad de parasitoides.
 
 # Los datos se tomarán en 24 sitios en 9 momentos distintos (frecuencia mensual)
+
+#Simularemos los datos
+
+#Primero generar un data frame con la información de sitios y momentos de muestreo
 sitios1 <- rep("s", 216)
 sitios2 <- rep(1:24, each = 1)
 sitios3 <- rep(sitios2, 9)
@@ -66,6 +69,9 @@ ggdag(escamas, layout = "circle") + theme_dag()
 
 
 # enumerar covariables
+
+library(dagitty) #cargar libreria dagitty 
+
 adjustmentSets(x = escamas, exposure = "x", outcome = "y", type="all", effect = "total")
 
 # Vemos que existe una relacion entre x y y a traves del pipe HE
@@ -76,7 +82,7 @@ adjustmentSets(x = escamas, exposure = "x", outcome = "y", type="all", effect = 
 td_dag <- tidy_dagitty(escamas)
 
 
-# Controlamos por el fork V
+# Controlaremos por el fork V
 
 # d relativos
 d_node <- node_dseparated(td_dag, "x", "y", controlling_for = "V")

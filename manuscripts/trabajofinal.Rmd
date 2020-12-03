@@ -2,16 +2,135 @@
 title: "Trabajo Final"
 author: "Minor Solano Gutiérrez"
 date: "3/12/2020"
-output: html_document
+output:
+  
+  prettydoc::html_pretty:
+    theme: leonids
+    highlight: github
+    toc: true
+    
 ---
 
+Proyecto final
+
+Curso: Herramientas prácticas para investigación reproducible
+
+Estudiante: Minor Solano Gutiérrez
+
+II-2020
+
+Link al repositorio GitHub https://github.com/Minorsg/Trabajo_final.git 
+
+# Tema 
+Influencia de la complejidad estructural de la comunidad vegetal del entorno en la composición de especies de escamas armadas (Hemiptera: Diaspididae) y sus parasitoides, en palmas ornamentales en ambientes urbanos en Costa Rica
+
+# Pregunta 
+¿Cuál impacto tiene la complejidad estructural de la comunidad vegetal del entorno en la abundancia y diversidad de avispas parasitoides de escamas armadas (Hemiptera: Diaspididae) en palmas ornamentales en ambientes urbanos?
+
+# Hipótesis
+
+La diversidad de especies de escamas Diaspididae y sus parasitoides Hymenoptera en palmas ornamentales variará según la complejidad estructural de la comunidad vegetal entorno, donde, en hábitats más complejos (p. e. parques) habrá una mayor diversidad (H') de especies, tanto de escamas, como de parasitoides, respecto a un hábitat más simple (p. e. bordes de calle o parqueos). Pero no una mayor uniformidad de especies (J') (i.e. la proporción de la diversidad observada en cada hábitat, respecto a máxima diversidad posible, i.e. riqueza total), debido a las especies de especialistas de cada hábitat. Por lo que, se espera menos diversidad, pero con abundancias relativas más estables por la proporción de especies de especialistas en hábitats simples, respecto a mayor diversidad, pero con abundancias relativas menores y más heterogéneas en hábitat complejos. Esto podría explicar las razones por las cuáles zonas con una baja complejidad vegetal del entorno son más propensas a experimentar grandes incrementos en las poblaciones de escamas y proponer métodos de manejo más sostenibles de poblaciones de estos insectos basados en aumentar la complejidad estructural de la comunidad vegetal del entorno.
+
+El número de plantas (V) influencia la complejidad estructural de la comunidad vegetal del entorno (x), tanto el número de plantas como la complejidad estructural influye en la diversidad de escamas (HE) y esta en la abundancia (E) de estos insectos herbívoros. Las escamas son hospederos de los parasitoides y una mayor abundanacia (E) causan mayor abundancia de parasitoides (A) y una mayor diversidad de escamas (HE) y mayor diversidad de parasitoides (y).La abundacia influye sobre la proporción de especialistas (S) y este a su vez sobre la uniformidad de especies (J)
+
+En este trabajo daremos énfasis a nuestra pregunta principalmente que busca responder si la complejidad estructural causa una mayor diversidad de parasitoides
+
+
+# Datos
+
+Los datos se tomarán en 24 sitios en 9 momentos distintos (frecuencia mensual)
+
 ```{r}
+
+#Simularemos los datos
+
+#Primero generar un data frame con la información de sitios y momentos de muestreo
+
+sitios1 <- rep("s", 216)
+sitios2 <- rep(1:24, each = 1)
+sitios3 <- rep(sitios2, 9)
+sitio <- paste(sitios1, sitios3)
+
+muestreos1 <- rep("m", 216)
+muestreos2 <- rep(1:9, each = 24)
+muestreo <- paste(muestreos1, muestreos2)
+
+datos <- data.frame(muestreo, sitio)
+str(datos)
 
 ```
 
-
+## DAG
 
 ```{r}
+
+#Crear DAG
+
+library(ggdag) #cargar libreria ggdag
+
+escamas <- dagify(x ~ V,
+                  HE ~ V,
+                  HE ~ x,
+                  E ~ HE,
+                  A ~ E,
+                  y ~ HE,
+                  S ~ E,
+                  S ~ A,
+                  J ~ S,
+                  J ~ HE,
+                  J ~ y,
+                   A ~ y,
+                 
+                  
+                  exposure = "x",
+                  outcome = "y")
+tidy_dagitty(escamas)
+ggdag(escamas, layout = "circle") + theme_dag()
+
+
+# enumerar covariables
+library(dagitty) #cargar libreria dagitty 
+
+adjustmentSets(x = escamas, exposure = "x", outcome = "y", type="all", effect = "total")
+
+# Vemos que existe una relacion entre x y y a traves del pipe HE
+
+
+# Compactar
+td_dag <- tidy_dagitty(escamas)
+
+
+# Controlaremos por el fork V
+
+# d relativos
+d_node <- node_dseparated(td_dag, "x", "y", controlling_for = "V")
+
+# grafico DAG compactado
+ggplot(d_node, aes(
+  x = x, 
+  y = y, 
+  xend = xend, 
+  yend = yend, 
+  shape = adjusted, 
+  col= d_relationship
+)) +
+  geom_dag_edges_link()+
+  geom_dag_point() +
+  geom_dag_text(col = "white") +
+  theme_dag() + 
+  scale_adjusted() +
+  expand_plot(expand_y = expansion(c(0.2, 0.2))) +
+  scale_color_manual(values = c("Black", "White"), 
+                     name = "d-relationship", 
+                     na.value = "grey85"
+  )
+
+
+# Implicaciones de independencia.
+
+impliedConditionalIndependencies(x = escamas, type = "missing.edge")
+
+impliedConditionalIndependencies(x = escamas, type = "basis.set")
 
 ```
 
