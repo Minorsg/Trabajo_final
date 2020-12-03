@@ -26,12 +26,24 @@
 #La diversidad de parasitoides y escamas a su vez permite una mayor abundancia de parasitoides (A), ya que se reduce la competencia por hospederos.
 #La abundacia influye sobre la proporción de especialistas (S) y este a su vez sobre la uniformidad de especies (J)
 
-# Nuestra pregunta principalmente busca responder si la complejidad estructural causa una mayor diversidad de parasitoides.
+# En este trabajo daremos énfasis a nuestra pregunta principalmente que busca responder si la complejidad estructural causa una mayor diversidad de parasitoides.
 
+# Los datos se tomarán en 24 sitios en 9 momentos distintos (frecuencia mensual)
+sitios1 <- rep("s", 216)
+sitios2 <- rep(1:24, each = 1)
+sitios3 <- rep(sitios2, 9)
+sitio <- paste(sitios1, sitios3)
 
-library(ggdag) #cargar libreria ggdag
+muestreos1 <- rep("m", 216)
+muestreos2 <- rep(1:9, each = 24)
+muestreo <- paste(muestreos1, muestreos2)
+
+datos <- data.frame(muestreo, sitio)
+str(datos)
 
 #Crear DAG
+
+library(ggdag) #cargar libreria ggdag
 
 escamas <- dagify(x ~ V,
                   HE ~ V,
@@ -53,8 +65,6 @@ tidy_dagitty(escamas)
 ggdag(escamas, layout = "circle") + theme_dag()
 
 
-
-
 # enumerar covariables
 adjustmentSets(x = escamas, exposure = "x", outcome = "y", type="all", effect = "total")
 
@@ -71,7 +81,7 @@ td_dag <- tidy_dagitty(escamas)
 # d relativos
 d_node <- node_dseparated(td_dag, "x", "y", controlling_for = "V")
 
-# grafico
+# grafico DAG compactado
 ggplot(d_node, aes(
   x = x, 
   y = y, 
@@ -91,17 +101,17 @@ ggplot(d_node, aes(
                      na.value = "grey85"
   )
 
-#Para "probar" el modelo podría interesarnos saber cuales implicaciones de independencia deberían cumplirse si es que el modelo es correcto.
+# Implicaciones de independencia.
+
 impliedConditionalIndependencies(x = escamas, type = "missing.edge")
 
 impliedConditionalIndependencies(x = escamas, type = "basis.set")
 
-# Simulemos las relaciones de dependencia que especificamos:
+
+# Simulación de las relaciones de dependencia específicadas:
 
 # Los datos son conteos, por lo que son datos discretos y dado esto no simularemos datos siguiendo una distribución normal
 # Importante aclarar que en los datos reales podría haber sobre dispersión, lo que es más posible por lo que se simulará con una distribución binomial negativa
-
-
 
 # V = número de palmas (plantas hospederas del insecto fitófago) en el sitio de muestreo 
 #En el caso de V, no pueden haber datos con cero palmas, porque haber palmas es un requisito
@@ -109,7 +119,7 @@ impliedConditionalIndependencies(x = escamas, type = "basis.set")
 library(extraDistr)
 
 V <- rtpois(24, lambda = 4, a = 1, b = 6)
-barplot(table(V))
+
 
 # x = complejidad estructural de la comunidad vegetal del entorno
 # Se utilizará se utilizará un índice de complejidad estructural ("SCI", por sus siglas en inglés; Shrewsbury & Raupp, 2000, 2006) 
@@ -124,16 +134,97 @@ barplot(table(V))
 # El número total de cuadrados con vegetación representará el SCI para ese paisaje (SCI máximo = 500). Un SCI < 125 = un paisaje simple y un SCI > 175 = un paisaje complejo. 
 
 x <- rnbinom(n = 24, mu = 40, size = 5)*V # x depende de V 
-barplot(table(x))
 
-# HE = diversidad de escamas, en este caso diversidad si podría tener distribución normal, ya que si se tiene un conjunto de índices de diversidad replicados de diferentes sitios, el índice de diversidad podría considerarse como observaciones
-HE.err <- rnorm(n = 24, mean = 0, sd = 0.5)
-HE <- 0 + 0.5*V + 0.5*x + HE.err # E depende de V y de x
+
+# Los muestreos se harán durante 9 momentos distintos, por lo que se simularán datos de diversidad para cada momento de muestreo
+# HE = diversidad de escamas, en este caso diversidad si se podría simular con una distribución normal, ya que si se tiene un conjunto de índices de diversidad replicados de diferentes sitios, el índice de diversidad podría considerarse como observaciones
+
+HE.err1 <- rnorm(n = 24, mean = 0, sd = 0.5)
+HE1 <- 0 + 0.5*V + 0.5*x + HE.err1 # E depende de V y de x
+
+HE.err2 <- rnorm(n = 24, mean = 0, sd = 0.6)
+HE2 <- 0 + 0.5*V + 0.5*x + HE.err2
+
+HE.err3 <- rnorm(n = 24, mean = 0, sd = 0.4)
+HE3 <- 0 + 0.5*V + 0.5*x + HE.err3
+
+HE.err4 <- rnorm(n = 24, mean = 0, sd = 0.5)
+HE4 <- 0 + 0.5*V + 0.5*x + HE.err4
+
+HE.err5 <- rnorm(n = 24, mean = 0, sd = 0.3)
+HE5 <- 0 + 0.5*V + 0.5*x + HE.err5
+
+HE.err6 <- rnorm(n = 24, mean = 0, sd = 0.7)
+HE6 <- 0 + 0.5*V + 0.5*x + HE.err6
+
+HE.err7 <- rnorm(n = 24, mean = 0, sd = 0.5)
+HE7 <- 0 + 0.5*V + 0.5*x + HE.err7
+
+HE.err8 <- rnorm(n = 24, mean = 0, sd = 0.6)
+HE8 <- 0 + 0.5*V + 0.5*x + HE.err8
+
+HE.err9 <- rnorm(n = 24, mean = 0, sd = 0.4)
+HE9 <- 0 + 0.5*V + 0.5*x + HE.err9
+
+HE <- c(HE1, HE2, HE3, HE4, HE5, HE6, HE7, HE8, HE9)
+
+datos$HE <- HE
+head(datos)
 
 # y = diversidad de parasitoides 
-y.err <- rnorm(n = 24, mean = 0, sd = 0.5)
-y <- 0 + 0.75*E + y.err # y depende de E
+y.err1 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y1 <- 0 + 0.75*HE1 + y.err1 # y depende de HE
 
+y.err2 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y2 <- 0 + 0.75*HE1 + y.err2
+
+y.err3 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y3 <- 0 + 0.75*HE1 + y.err3
+
+y.err4 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y4 <- 0 + 0.75*HE1 + y.err4
+
+y.err5 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y5 <- 0 + 0.75*HE1 + y.err5
+
+y.err6 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y6 <- 0 + 0.75*HE1 + y.err6
+
+y.err7 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y7 <- 0 + 0.75*HE1 + y.err7
+
+y.err8 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y8 <- 0 + 0.75*HE1 + y.err8
+
+y.err9 <- rnorm(n = 24, mean = 0, sd = 0.5)
+y9 <- 0 + 0.75*HE1 + y.err9
+
+y <- c(y1, y2, y3, y4, y5, y6, y7, y8, y9)
+
+datos$y <- y
+head(datos)
+
+# Como se consideró en la simulación de diversidad, la complejidad de la comunidad vegetal del entorno y el número plantas hospederas del fitófago posible se mantenga en cada momento de muestreo
+#Las incluímos al data frame
+V <- rep(V, 9)
+datos$V <- V
+x <- rep(x, 9)
+datos$x <- x
+
+head(datos)
+str(datos)
+summary(datos)
+
+#Importante recordar que según nuestro DAG, hay relacion entre x y y a traves del pipe HE y que deberiamos poder detectar si controlamos por V:
+
+# Exploración de distribución con histográmas
+
+par(mfrow = c(1, 3))
+hist(datos$x)
+hist(datos$V)
+hist(datos$y)
+
+#Se observa un distribución no normal
 
 
 
