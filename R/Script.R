@@ -115,6 +115,26 @@ muestreo <- paste(muestreos1, muestreos2)
 datos <- data.frame(muestreo, sitio)
 str(datos)
 
+#Hay un espacio innecesario en los datos de muestreo
+
+quitarespacio <- function(x, y, datos){
+  datos
+  searchString <- (x) 
+  replacementString <- (y)
+  datos = gsub(searchString,replacementString,datos)
+}
+datos$muestreo <- quitarespacio("m 1", "m1", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 2", "m2", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 3", "m3", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 4", "m4", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 5", "m5", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 6", "m6", datos$muestreo)
+datos$muestreo <- quitarespacio("m 7", "m7", datos$muestreo)
+datos$muestreo <- quitarespacio("m 8", "m8", datos$muestreo) 
+datos$muestreo <- quitarespacio("m 9", "m9", datos$muestreo) 
+
+
+
 # Simulación de las relaciones de dependencia específicadas:
 
 # Los datos son conteos, por lo que son datos discretos y dado esto no simularemos datos siguiendo una distribución normal
@@ -145,33 +165,34 @@ x <- rnbinom(n = 24, mu = 40, size = 5)*V # x depende de V
 
 # Los muestreos se harán durante 9 momentos distintos, por lo que se simularán datos de diversidad para cada momento de muestreo
 # HE = diversidad de escamas, en este caso diversidad si se podría simular con una distribución normal, ya que si se tiene un conjunto de índices de diversidad replicados de diferentes sitios, el índice de diversidad podría considerarse como observaciones
+# Le damos mayor peso a su dependencia con V
 
 HE.err1 <- rnorm(n = 24, mean = 0, sd = 0.5)
-HE1 <- 0 + 0.5*V + 0.5*x + HE.err1 # E depende de V y de x
+HE1 <- 0 + 0.06*V + 0.05*x + HE.err1 # E depende de V y de x
 
 HE.err2 <- rnorm(n = 24, mean = 0, sd = 0.6)
-HE2 <- 0 + 0.5*V + 0.5*x + HE.err2
+HE2 <- 0 + 0.06*V + 0.05*x + HE.err2
 
 HE.err3 <- rnorm(n = 24, mean = 0, sd = 0.4)
-HE3 <- 0 + 0.5*V + 0.5*x + HE.err3
+HE3 <- 0 + 0.06*V + 0.05*x + HE.err3
 
 HE.err4 <- rnorm(n = 24, mean = 0, sd = 0.5)
-HE4 <- 0 + 0.5*V + 0.5*x + HE.err4
+HE4 <- 0 + 0.06*V + 0.05*x + HE.err4
 
 HE.err5 <- rnorm(n = 24, mean = 0, sd = 0.3)
-HE5 <- 0 + 0.5*V + 0.5*x + HE.err5
+HE5 <- 0 + 0.06*V + 0.05*x + HE.err5
 
 HE.err6 <- rnorm(n = 24, mean = 0, sd = 0.7)
-HE6 <- 0 + 0.5*V + 0.5*x + HE.err6
+HE6 <- 0 + 0.06*V + 0.05*x + HE.err6
 
 HE.err7 <- rnorm(n = 24, mean = 0, sd = 0.5)
-HE7 <- 0 + 0.5*V + 0.5*x + HE.err7
+HE7 <- 0 + 0.06*V + 0.05*x + HE.err7
 
 HE.err8 <- rnorm(n = 24, mean = 0, sd = 0.6)
-HE8 <- 0 + 0.5*V + 0.5*x + HE.err8
+HE8 <- 0 + 0.06*V + 0.05*x + HE.err8
 
 HE.err9 <- rnorm(n = 24, mean = 0, sd = 0.4)
-HE9 <- 0 + 0.5*V + 0.5*x + HE.err9
+HE9 <- 0 + 0.06*V + 0.05*x + HE.err9
 
 HE <- c(HE1, HE2, HE3, HE4, HE5, HE6, HE7, HE8, HE9)
 
@@ -222,6 +243,7 @@ head(datos)
 str(datos)
 summary(datos)
 
+
 #Importante recordar que según nuestro DAG, hay relacion entre x y y a traves del pipe HE y que deberiamos poder detectar si controlamos por V:
 
 # Exploración de distribución con histográmas
@@ -235,37 +257,34 @@ hist(datos$y)
 
 # Modelo binomial negativo
 
-library(MASS)
+library(MASS) #cargar paquete MASS
+library(lme4) #cargar paquete lme4
+# Crear modelo logístico mixto, considerando el momento de muestreo
+escamas.glmer.nb <- glmer.nb(y ~ x + V + (1|muestreo),
+                    data=datos)
+summary(escamas.glmer.nb)
 
-# Crear modelo logístico 
-escamas.glm.nb <- glm.nb(y ~ x + V,
-                    data=datos,
-                    control = glm.control(maxit=10000))
+
+# Sin considerar el momento del muestreo 
+escamas.glm.nb <- glm.nb(y ~ x + V, link = "log",
+                             data=datos)
 summary(escamas.glm.nb)
 
 
-# Comparamos nuestro modelo con un modelo nulo
-nb.null <- glm.nb(y ~ 1, 
-                  link = "log", data = datos)
+
+
+# Comparamos nuestro modelo con un modelo nulo considerando el momento de muestreo
+nb.null <- glmer.nb(y ~ 1 + (1|muestreo), data = datos)
 summary(nb.null)
 
-AIC(escamas.glm.nb, nb.null)
+AIC(escamas.glmer.nb, nb.null)
 
-anova(escamas.glm.nb, nb.null, test = "Chi")
+anova(escamas.glmer.nb, nb.null, test = "Chi")
 
-# El modelo es mucho mejor que el nulo según el Theta
+# El modelo es mucho mejor que el nulo 
 
 
-
-# Análizamos diferencias significativas de nuestras variables predictoras (x, V) sobre nuestra respuesta (y)
-
-library(car)
-
-Anova(escamas.glm.nb,
-      type="II",
-      test="LR")
-
-# Según nuestros datos simulados siguiendo nuestra hipótesis de causalidad esperada, sí hay un efecto de la complejidad vegetal de la comunidad vegetal del entorno (x) y del número de plantas hospederas de escamas (Fitófago) sobre la diversidad de parasitoides (y)
+# Según nuestros datos simulados, sí hay un efecto de la complejidad vegetal de la comunidad vegetal del entorno (x), pero del número de plantas hospederas de escamas (Fitófago) (V) sobre la diversidad de parasitoides (y)
 
 # ¿Qué tanto explica el modelo los datos? Lo evaluamos en base a deviance de nuestro modelo y Null deviance
 1 - (escamas.glm.nb$deviance / escamas.glm.nb$null.deviance)
@@ -275,20 +294,16 @@ Anova(escamas.glm.nb,
 # Figuras
 
 #exploramos residuales
-op <- par(mfrow = c(2, 2))
-plot(escamas.glm.nb)
+plot(escamas.glmer.nb)
 
 
 # Predicción del modelo
-datos1 <- data.frame(x = seq(min(datos$x), max(datos$x), by = 10), y = mean(datos$y), V = mean(datos$V))
-                                                                              
+datos1 <- data.frame(x = seq(min(datos$x), max(datos$x), by = 1.91), y = mean(datos$y), V = mean(datos$V))                                                                             
 
 # Predicción del modelo sobre nuestros datos simulados
 
-datos2 <- cbind(datos1, predict(escamas.glm.nb, datos1, 
-                                type = "link", 
-                                se = T))
-
+datos2 <- cbind(datos1, predict(escamas.glm.nb, datos1, re.form=NA, type = "link", se = T))
+str(datos2)
 # Objeto con valores predichos por el modelo
 fit <- exp(datos2$fit)
 LL <- exp(datos2$fit- 1.96 * datos2$se.fit)
